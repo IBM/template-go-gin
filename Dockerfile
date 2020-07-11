@@ -1,32 +1,35 @@
-FROM golang:alpine
-
-#RUN yum -y install --disableplugin=subscription-manager wget git \
-#    && yum --disableplugin=subscription-manager clean all
-
-# Grab go version 1.13
-#RUN wget https://dl.google.com/go/go1.13.3.linux-amd64.tar.gz
-
-# Install go version 1.13
-#RUN tar -C /usr/local -xzf go1.13.3.linux-amd64.tar.gz
-
-# Setup go environment variables
-ENV GOPATH /go
-ENV PATH $GOPATH/bin:/usr/local/go/bin:$PATH
-
-# Configure application working directories
-RUN mkdir -p "$GOPATH/src" "$GOPATH/bin" && chmod -R 777 "$GOPATH"
-
-# Change working directory
-WORKDIR $GOPATH/src/goginapp/
+############################
+# STEP 1 build executable binary
+############################
+FROM golang:alpine AS builder
+# Install git.
+# Git is required for fetching the dependencies.
+RUN apk update && apk add --no-cache git
 
 # Install dependencies
 ENV GO111MODULE=on
-COPY . ./
+WORKDIR $GOPATH/src/packages/goginapp/
+COPY . .
+# Fetch dependencies.
+# Using go get.
+RUN go get -d -v
+
+# Build the binary.
+RUN go build -o /go/bin/hello
+RUN go build -o app
+
 RUN if test -e "go.mod"; then go build ./...; fi
+
+############################
+# STEP 2 build a small image
+############################
+FROM scratch
+# Copy our static executable.
+COPY --from=builder /go/bin/goginapp /go/bin/goginapp
 
 ENV PORT 8080
 ENV GIN_MODE release
 EXPOSE 8080
 
-RUN go build -o app
-CMD ["./app"]
+# Run the hello binary.
+ENTRYPOINT ["/go/bin/goginapp"]
