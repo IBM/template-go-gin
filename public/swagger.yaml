@@ -1,0 +1,39 @@
+swagger: '2.0'
+info:
+  x-ibm-name: edge-go-gateway
+  version: 1.0.0
+  title: Edge Go Service API
+  description: Sample Edge Services written in the GoLang Programming Langauge
+  contact:
+    email: mjperrin@us.ibm.com
+  termsOfService: "https://www-03.ibm.com/software/sla/sladb.nsf/sla/csdsp?OpenDocument"
+  license:
+    name: "Apache2"
+    url: "http://www.apache.org/licenses/LICENSE-2.0.html"
+
+consumes:
+  - application/json
+produces:
+  - application/json
+
+paths:
+  /health:
+    get:
+      operationId: get
+      description: Get health status of Edge Go Service
+      responses:
+        200:
+          description: "Health check response"
+          schema:
+            $ref: "#/definitions/healthResponse"
+          examples:
+            application/json: { "status": "UP"}
+
+definitions:
+  healthResponse:
+    type: "object"
+    properties:
+      status:
+        type: "string"
+      cluster:
+        type: "string"
