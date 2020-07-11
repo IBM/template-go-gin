@@ -59,20 +59,23 @@ spec:
         - |
           set -e
           if [ -n "${SONARQUBE_URL}" ]; then
-              echo "Add SonarQube Scan at this point"
+
+              echo "SonarQube configured"
+
           else
               echo "Skipping Sonar Qube step for now but include"
           fi
 
           if exists sonar-scanner; then
               echo "Sonar Scanner task found"
+
           else
               echo "Skipping SonarQube step, no task defined"
               exit 0
           fi
 
           sonar-scanner \
-              -Dsonar.login=${SONARQUBE_USER} \
-              -Dsonar.password=${SONARQUBE_PASSWORD} \
-              -Dsonar.host.url=${SONARQUBE_URL} \
-              -Psonar.projectName=${IMAGE_NAME}
+            -Dsonar.login=${SONARQUBE_USER} \
+            -Dsonar.password=${SONARQUBE_PASSWORD} \
+            -Dsonar.host.url=${SONARQUBE_URL} \
+            -Dsonar.projectName=${IMAGE_NAME}
