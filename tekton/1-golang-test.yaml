@@ -63,3 +63,16 @@ spec:
           else
               echo "Skipping Sonar Qube step for now but include"
           fi
+
+          if exists sonar-scanner; then
+              echo "Sonar Scanner task found"
+          else
+              echo "Skipping SonarQube step, no task defined"
+              exit 0
+          fi
+
+          sonar-scanner \
+              -Dsonar.login=${SONARQUBE_USER} \
+              -Dsonar.password=${SONARQUBE_PASSWORD} \
+              -Dsonar.host.url=${SONARQUBE_URL} \
+              -Psonar.projectName=${IMAGE_NAME}

@@ -65,7 +65,7 @@ spec:
             resource: docker-image
     - name: gitops
       taskRef:
-        name: igc-gitops-edge-v1-24-0
+        name: igc-gitops-v1-24-0
       runAfter:
        - release
       resources:
