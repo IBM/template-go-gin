@@ -77,19 +77,26 @@ Your sources will be compiled to your `$GOPATH/bin` directory. Your application 
 ### Deploying to Red Hat OpenShift 
 
 Make sure you are logged into the IBM Cloud using the IBM Cloud CLI and have access 
-to your development cluster.
+to your OpenShift development cluster.
 
 ```$bash
-npm i -g @ibmgaragecloud/cloud-native-toolkit-cli
-ibmcloud login -a cloud.ibm.com -r <region> -g <resource group>
-ibmcloud ks cluster-config --cluster <cluster-name>
-kubectl get pods
+oc login
+oc get pods
+npm install -g @ibmgaragecloud/cloud-native-toolkit-cli
+git clone <code pattern> | cd <code pattern>
 
 ```
 
-Use the IBM Garage for Cloud CLI to register the GIT Repo with Jenkins environment 
+Register the GIT Repo with Tekton or Jenkins CI engine 
 ```$bash
-igc pipeline -n dev
+oc sync <project> --dev
+oc pipeline 
+```
+
+View your Tekton pipelines in the Developer 
+
+```bash
+oc dashboard
 ```
 
 ## Deploy to IBM Edge Application Manager
