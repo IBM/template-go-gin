@@ -1,8 +1,8 @@
 swagger: '2.0'
 info:
-  x-ibm-name: edge-go-gateway
+  x-ibm-name: template-go-gin
   version: 1.0.0
-  title: Edge Go Service API
+  title:  Go Service for Edge
   description: Sample Edge Services written in the GoLang Programming Langauge
   contact:
     email: mjperrin@us.ibm.com

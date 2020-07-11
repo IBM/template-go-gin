@@ -1,5 +1,0 @@
----
-- version: v1alpha1
-  group: gsi.ibm.com
-  kind: EdgeGoGateway
-  chart: /opt/helm/helm-charts/edge-go-gateway

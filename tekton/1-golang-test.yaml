@@ -70,8 +70,7 @@ spec:
             sonar-scanner \
             -Dsonar.login=${SONARQUBE_USER} \
             -Dsonar.password=${SONARQUBE_PASSWORD} \
-            -Dsonar.host.url=${SONARQUBE_URL} \
-            -Dsonar.projectKey=${IMAGE_NAME}
+            -Dsonar.host.url=${SONARQUBE_URL}
 
           else
               echo "Skipping Sonar Qube step for now but include"
