@@ -15,7 +15,7 @@ COPY . .
 RUN go get -d -v
 
 # Build the binary.
-RUN go build -o /go/bin/hello
+RUN go build -o /go/bin/goinapp
 RUN go build -o app
 
 RUN if test -e "go.mod"; then go build ./...; fi
