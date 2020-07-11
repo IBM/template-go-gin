@@ -76,5 +76,4 @@ spec:
             -Dsonar.login=${SONARQUBE_USER} \
             -Dsonar.password=${SONARQUBE_PASSWORD} \
             -Dsonar.host.url=${SONARQUBE_URL} \
-            -D
-            -Dsonar.projectName=${IMAGE_NAME}
+            -Dsonar.projectKey=${IMAGE_NAME}
