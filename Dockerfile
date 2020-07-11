@@ -10,6 +10,7 @@ RUN apk update && apk add --no-cache git
 ENV GO111MODULE=on
 WORKDIR $GOPATH/src/packages/goginapp/
 COPY . .
+
 # Fetch dependencies.
 # Using go get.
 RUN go get -d -v
