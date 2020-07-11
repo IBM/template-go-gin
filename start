@@ -1,0 +1,10 @@
+#!/bin/sh
+
+type nginx > /dev/null 2>&1
+if test $? != 0; then
+  echo "ERROR: Could not find 'nginx'."
+  echo "       Please add it to your PATH variable."
+  exit 1
+fi
+
+nginx -p `pwd` -c nginx.conf

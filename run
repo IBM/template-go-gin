@@ -1,0 +1,15 @@
+#!/usr/bin/env bash
+
+IMAGE_NAME="template-go-gin"
+IMAGE_VER="1.0.1"
+
+if [[ -z "${IMAGE_NAME}" ]] || [[ -z "${IMAGE_VER}" ]]; then
+   echo "Required input is missing"
+   echo "Usage: build.sh IMAGE_NAME IMAGE_VER"
+   exit 1
+fi
+
+echo "Building ${IMAGE_NAME}:${IMAGE_VER}"
+
+docker run -d -p 80:80 --env PORT=80 --env APP_ROOT='sandbox' ${IMAGE_NAME}:${IMAGE_VER}
+

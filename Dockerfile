@@ -16,21 +16,23 @@ COPY . .
 RUN go get -d -v
 
 # Build the binary.
-RUN go build -o /go/bin/goginapp
-RUN go build -o app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/main .
 
-RUN if test -e "go.mod"; then go build ./...; fi
+COPY public public
 
 ############################
 # STEP 2 build a small image
 ############################
 FROM scratch
+
 # Copy our static executable.
-COPY --from=builder /go/bin/goginapp /go/bin/goginapp
+COPY --from=builder /go/main /go/main
+COPY --from=builder /public /go/public
 
 ENV PORT 8080
 ENV GIN_MODE release
 EXPOSE 8080
 
-# Run the hello binary.
-ENTRYPOINT ["/go/bin/goginapp"]
+# Run the Go Gin binary.
+ENTRYPOINT ["/go/main"]
+
