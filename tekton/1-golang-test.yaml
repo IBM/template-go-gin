@@ -58,13 +58,6 @@ spec:
         - -c
         - |
           set -e
-          if [ -n "${SONARQUBE_URL}" ]; then
-
-              echo "SonarQube configured"
-
-          else
-              echo "Skipping Sonar Qube step for now but include"
-          fi
 
           if ! command -v sonar-scanner &> /dev/null
           then
@@ -72,8 +65,14 @@ spec:
               exit 0
           fi
 
-          sonar-scanner \
+          if [ -n "${SONARQUBE_URL}" ]; then
+
+            sonar-scanner \
             -Dsonar.login=${SONARQUBE_USER} \
             -Dsonar.password=${SONARQUBE_PASSWORD} \
             -Dsonar.host.url=${SONARQUBE_URL} \
             -Dsonar.projectKey=${IMAGE_NAME}
+
+          else
+              echo "Skipping Sonar Qube step for now but include"
+          fi
