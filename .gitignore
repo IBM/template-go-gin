@@ -3,3 +3,4 @@ vendor/
 server/localdev-config.json
 localdev-config.json
 server/localdev-config.json
+/main

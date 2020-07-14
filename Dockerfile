@@ -18,20 +18,22 @@ RUN go get -d -v
 # Build the binary.
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o /go/main .
 
-COPY public public
-
 ############################
 # STEP 2 build a small image
 ############################
-FROM scratch
+FROM alpine
+
+WORKDIR /
 
 # Copy our static executable.
 COPY --from=builder /go/main /go/main
-COPY --from=builder /public /go/public
+COPY public /go/public
 
 ENV PORT 8080
 ENV GIN_MODE release
 EXPOSE 8080
+
+WORKDIR /go
 
 # Run the Go Gin binary.
 ENTRYPOINT ["/go/main"]
