@@ -74,6 +74,25 @@ go run server.go
 
 Your sources will be compiled to your `$GOPATH/bin` directory. Your application will be running at `http://localhost:8080`. You can also verify the state of your locally running application using the Selenium UI test script included in the `scripts` directory.
 
+
+#### Local Development with Docker
+
+To build the application into a local docker image you need to have the [Docker Desktop](https://www.docker.com/products/docker-desktop) installed  
+
+Run the following command to build it into a versioned package 
+```
+./build
+```
+To run locally 
+```
+./run
+```
+
+To boostrap into the running image run the following command 
+```
+docker run -it --entrypoint /bin/sh -p 8080:8080 template-go-gin:1.0.1
+```
+
 ### Deploying to Red Hat OpenShift 
 
 Make sure you are logged into the IBM Cloud using the IBM Cloud CLI and have access 
