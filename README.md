@@ -120,27 +120,51 @@ oc dashboard
 
 ## Deploy to IBM Edge Application Manager
 
-The following steps assist you in the deployment of the 
+The following steps assist you in the deployment of the edge app to the Edge Exchange , IBM Edge Application Manager 
 
-### Install HNZ CLI
+### Install HZN CLI MacOS
 
 ```
 wget http://pkg.bluehorizon.network/macos/certs/horizon-cli.crt
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain horizon-cli.crt
 sudo installer -pkg horizon-cli-2.24.18.pkg -target / -allowUntrusted
 ```
+### Install HZN CLi Linux
 
+```bash
+
+
+```
+### Build and Register the Edge App 
+Log into your Edge Management cluster and define these varables
 Configure the following properties before publishing the Service information to the Edge server
+
 ```bash
 export CLOUD_API_KEY=<api-key>
-export HZN_EXCHANGE_USER_AUTH=iamapikey:<api-key>
-export HZN_EXCHANGE_URL=<url of Edge Manager>/edge-exchange/v1/
+export HZN_EXCHANGE_URL=https://$(oc get routes icp-console -o jsonpath='{.spec.host}' -n kube-system)/edge-exchange/v1
+export EXCHANGE_ROOT_PASS=$(oc -n kube-system get secret ibm-edge-auth -o jsonpath="{.data.exchange-root-pass}" | base64 --decode)
+HZN_EXCHANGE_USER_AUTH="root/root:$EXCHANGE_ROOT_PASS"
+export HZN_ORG_ID=IBM
+```
+
+Trust you exchange server with your Development environment on MacOS
+
+Extract the certificate from teh Edge Application Manager
+
+```bash
+oc --namespace kube-system get secret cluster-ca-cert -o jsonpath="{.data['tls\.crt']}" | base64 --decode > /tmp/icp-ca.crt
+```
+
+Register the certificate into MacOS Key Chain
+
+```bash
+sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/icp-ca.crt
 ```
 
 Create your Signing Key Pair
 
 ```bash
- hzn key create "IBM" "mjperrin@us.ibm.com"
+hzn key create "IBM" "mjperrin@us.ibm.com"
 ```
 
 Login to the IBM Image Registry using `docker login`
@@ -151,12 +175,7 @@ docker login -u iamapikey -p <api-key> us.icr.io
 To publish the service definition, and the deployment policy to the Edge Manager run the following command
 
 ```bash
-export CLOUD_API_KEY={IBMCLOUD_API_KEY}
-export HZN_EXCHANGE_USER_AUTH=iamapikey:{IBM_CLOUD_API_KEY
-export HZN_EXCHANGE_URL=https://icp-console.edge-computing-ocp43-3b1fc50af0b2002f0241bdf5d2432efd-0000.us-east.containers.appdomain.cloud/edge-exchange/v1/
-
 docker login -u iamapikey -p $CLOUD_API_KEY us.icr.io
-
 ```
 
 Publish the Edge Device Service
@@ -164,6 +183,43 @@ Publish the Edge Device Service
 ```bash
 make publish-service
 ```
+
+### Configuring GitOps with Tekton
+
+You first need to create a secret in your development project called `edge-access` and it needs to contain
+the following properties. 
+
+You can run this script to create the secret yaml.
+
+```
+cd tekton
+./build-secret.sh
+``` 
+
+Log into your Development cluster and run the following to registry the secret
+
+```bash
+kubectl apply -f edge-access-secret.yaml
+```
+
+Then Registry the Tekton Tasks and pipelines
+
+```bash
+kubectl apply -f 1-golang-test.yaml
+kubectl apply -f 8-gitops-edge.yaml
+jubectl apply -f golang-pipeline.yaml
+```
+
+Final part is Template this repo into your own repo in your destination git organization.
+
+Register the pipeline with Tekton
+```bash
+oc sync dev-edge --dev
+oc pipeline
+{select the `golang-pipeline`}
+```
+
+Enjoy end to end CI/CD with Tekton and IBM Edge Application Manager
 
 ## Next steps
 * Learn more about augmenting your Go applications on IBM Cloud with the [Go Programming Guide](https://cloud.ibm.com/docs/go?topic=go-getting-started).

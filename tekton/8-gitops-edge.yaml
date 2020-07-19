@@ -41,32 +41,36 @@ spec:
           echo "IMAGE_VERSION=$(git describe --abbrev=0 --tags)" > ./env-config
           echo "IMAGE_NAME=$(basename -s .git `git config --get remote.origin.url` | tr '[:upper:]' '[:lower:]' | sed 's/_/-/g')" >> ./env-config
 
+          # Install HZN CLI
+          arch=$(dpkg --print-architecture)
+          dist=bionic
+          version=2.26.12
+          wget http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/bluehorizon_${version}~ppa~ubuntu.${dist}_all.deb
+          wget http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli_${version}~ppa~ubuntu.${dist}_${arch}.deb
+          wget http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon_${version}~ppa~ubuntu.${dist}_${arch}.deb
+          dpkg -i horizon-cli_${version}~ppa~ubuntu.${dist}_${arch}.deb
+          dpkg -i horizon_${version}~ppa~ubuntu.${dist}_${arch}.deb
+          dpkg -i bluehorizon_${version}~ppa~ubuntu.${dist}_all.deb
+
           cat ./env-config
-    - name: gitops
+
+    - name: gitops-edge
       image: $(inputs.params.tools-image)
       workingdir: $(inputs.resources.source.path)
       env:
         - name: HOME
           value: /home/devops
-        - name: GIT_AUTH_USER
-          valueFrom:
-            secretKeyRef:
-              name: git-credentials
-              key: username
-              optional: true
-        - name: GIT_AUTH_PWD
-          valueFrom:
-            secretKeyRef:
-              name: git-credentials
-              key: password
-              optional: true
       envFrom:
         - configMapRef:
-            name: gitops-cd-secret
+            name: ibmcloud-config
             optional: true
-        - configMapRef:
-            name: gitops-repo
+        - secretRef:
+            name: edge-access
             optional: true
+        - secretRef:
+            name: ibmcloud-apikey
+            optional: true
+
       command: ["/bin/bash"]
       args:
         - -c
@@ -74,13 +78,13 @@ spec:
           set -e
           set -x
 
-          if [[ -z "${host}" ]] || [[ -z "${org}" ]] || [[ -z "${repo}" ]]; then
-              echo "GitOps repo has not been configured. Skipping trigger step"
+          if [[ -z "${HZN_EXCHANGE_URL}" ]] ]]; then
+              echo "Edge Exchange has not been configured. Skipping trigger step"
               exit 0
           fi
 
-          if [[ -z "${GIT_AUTH_USER}" ]] || [[ -z "${GIT_AUTH_PWD}" ]]; then
-              echo "Credentials for GitOps repo not set"
+          if [[ -z "${HZN_EXCHANGE_USER_AUTH}" ]] || [[ -z "${HZN_CERTIFICATE}" ]]; then
+              echo "Edge Credentials or Certificate not set"
               exit 1
           fi
 
@@ -90,31 +94,24 @@ spec:
 
           . ./env-config
 
-          git config --global user.email "cloud-native-toolkit@example.com"
-          git config --global user.name "Cloud Native Toolkit Pipeline"
+          APP_IMAGE="${REGISTRY_URL}/${REGISTRY_NAMESPACE}/${IMAGE_NAME}"
 
-          GIT_URL="https://${GIT_AUTH_USER}:${GIT_AUTH_PWD}@${host}/${org}/${repo}"
+          jq -n --arg HZN_ORG_ID $HZN_ORG_ID \
+                --arg APP_IMAGE ${APP_IMAGE} \
+                --arg IMAGE_NAME ${IMAGE_NAME} \
+                --arg IMAGE_VERSION ${IMAGE_VERSION} \
 
-          echo "Cloning repo: https://${GIT_AUTH_USER}:xxxx@${host}/${org}/${repo}"
+          '{ \
+            "HZN_ORG_ID": "$HZN_ORG_ID", \
+            "MetadataVars": { \
+              "DOCKER_IMAGE_BASE": "$APP_IMAGE", \
+              "SERVICE_NAME": "$IMAGE_NAME", \
+              "SERVICE_VERSION": "$IMAGE_VERSION" \
+            } \
+          }' > ./horizon/hzn.json
 
-          git clone -b ${branch} ${GIT_URL} gitops_cd
-          cd gitops_cd
+          cat ./horizon/hzn.json
 
-          echo "Requirements before update"
-          cat "./${IMAGE_NAME}/requirements.yaml"
+          make publish-service
 
-          # TODO avoid using igc to use yq
-          npm i -g @garage-catalyst/ibm-garage-cloud-cli
-          igc yq w ./${IMAGE_NAME}/requirements.yaml "dependencies[?(@.name == '${IMAGE_NAME}')].version" ${IMAGE_VERSION} -i
-
-          echo "Requirements after update"
-          cat "./${IMAGE_NAME}/requirements.yaml"
-
-          if [[ $(git status -s | wc -l) -eq 0 ]]; then
-            echo "No changes"
-            exit 0
-          fi
-
-          git add -u
-          git commit -m "Updates ${IMAGE_NAME} to ${IMAGE_VERSION}"
-          git push -v
+          echo "Edge Service registried"
