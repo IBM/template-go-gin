@@ -1,9 +1,9 @@
 {
     "HZN_ORG_ID": "IBM",
     "MetadataVars": {
-        "DOCKER_IMAGE_BASE": "us.icr.io/appdev-cloudnative-registry/edge-go-gateway",
-        "SERVICE_NAME": "ibm.edge.go.gateway",
-        "SERVICE_VERSION": "1.0.2"
+        "DOCKER_IMAGE_BASE": "us.icr.io/appdev-cloudnative-registry/template-go-gin",
+        "SERVICE_NAME": "template-go-gin",
+        "SERVICE_VERSION": "0.0.1-dev.9"
     }
 }
 
