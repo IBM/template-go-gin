@@ -1,9 +1,9 @@
 {
     "HZN_ORG_ID": "IBM",
     "MetadataVars": {
-        "DOCKER_IMAGE_BASE": "us.icr.io/appdev-cloudnative-registry/template-go-gin",
+        "DOCKER_IMAGE_BASE": "us.icr.io/gsi-cloudnative-dev-squad/template-go-gin",
         "SERVICE_NAME": "template-go-gin",
-        "SERVICE_VERSION": "0.0.1-dev.9"
+        "SERVICE_VERSION": "0.0.1"
     }
 }
 
