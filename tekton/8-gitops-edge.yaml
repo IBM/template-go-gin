@@ -108,8 +108,6 @@ spec:
 
           cat ./horizon/hzn.json
 
-          echo ${APIKEY}
-
           # Publish Service to Edge Application Manager
           hzn key create "IBM" "user@us.ibm.com"
 
