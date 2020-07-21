@@ -35,7 +35,7 @@ test: build
 
 # Publish the service to the Horizon Exchange for the current architecture
 publish-service:
-	hzn exchange service publish -I -O -r "us.icr.io:iamapikey:$(API_KEY)" -f horizon/service.definition.json
+	hzn exchange service publish -I -O -r "us.icr.io:iamapikey:$(APIKEY)" -f horizon/service.definition.json
 
 # Target for travis to publish service and pattern after PR is merged  
 publish: 
