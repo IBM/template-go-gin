@@ -140,7 +140,7 @@ Log into your Edge Management cluster and define these varables
 Configure the following properties before publishing the Service information to the Edge server
 
 ```bash
-export CLOUD_API_KEY=<api-key>
+export APIKEY=<api-key>
 export HZN_EXCHANGE_URL=https://$(oc get routes icp-console -o jsonpath='{.spec.host}' -n kube-system)/edge-exchange/v1
 export EXCHANGE_ROOT_PASS=$(oc -n kube-system get secret ibm-edge-auth -o jsonpath="{.data.exchange-root-pass}" | base64 --decode)
 HZN_EXCHANGE_USER_AUTH="root/root:$EXCHANGE_ROOT_PASS"
@@ -169,13 +169,13 @@ hzn key create "IBM" "mjperrin@us.ibm.com"
 
 Login to the IBM Image Registry using `docker login`
 ```bash
-docker login -u iamapikey -p <api-key> us.icr.io
+docker login -u iamapikey -p ${APIKEY} us.icr.io
 ```
 
 To publish the service definition, and the deployment policy to the Edge Manager run the following command
 
 ```bash
-docker login -u iamapikey -p $CLOUD_API_KEY us.icr.io
+docker login -u iamapikey -p $APIKEY us.icr.io
 ```
 
 Publish the Edge Device Service
