@@ -21,6 +21,7 @@ This **Go** Starter Kit Template can be the foundation for an Edge , Cloud-Nativ
 
 The starter kit provides the following features:
 
+- This Starter Kit has been optimised for deployment into OpenShift using the [IBM Cloud Native Toolkit](https://cloudnativetoolkit.dev/) install this before following instructions
 - Built with [Go](https://golang.org/dl/)
 - REST services using [Gin](https://github.com/gin-gonic/gin)
 - Swagger documentation using [Swagger UI](https://swagger.io/docs/open-source-tools/swagger-ui/usage/installation/)
@@ -109,7 +110,8 @@ git clone <code pattern> | cd <code pattern>
 Register the GIT Repo with Tekton or Jenkins CI engine 
 ```$bash
 oc sync <project> --dev
-oc pipeline 
+oc pipeline
+{select golang-pipeline pipeline}
 ```
 
 View your Tekton pipelines in the Developer 
@@ -117,10 +119,11 @@ View your Tekton pipelines in the Developer
 ```bash
 oc dashboard
 ```
+Click on Pipelines and then switch to Developer view and click on Pipelines to see the pipeline running
 
 ## Deploy to IBM Edge Application Manager
 
-The following steps assist you in the deployment of the edge app to the Edge Exchange , IBM Edge Application Manager 
+The following steps assist you in the deployment of the edge app to the IBM Edge Application Manager.
 
 ### Install HZN CLI MacOS
 
@@ -132,11 +135,20 @@ sudo installer -pkg horizon-cli-2.24.18.pkg -target / -allowUntrusted
 ### Install HZN CLi Linux
 
 ```bash
-
-
+arch=$(dpkg --print-architecture)
+dist=bionic
+version=2.26.12
+wget http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/bluehorizon_${version}~ppa~ubuntu.${dist}_all.deb
+wget http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon-cli_${version}~ppa~ubuntu.${dist}_${arch}.deb
+wget http://pkg.bluehorizon.network/linux/ubuntu/pool/main/h/horizon/horizon_${version}~ppa~ubuntu.${dist}_${arch}.deb
+dpkg -i horizon-cli_${version}~ppa~ubuntu.${dist}_${arch}.deb
+dpkg -i horizon_${version}~ppa~ubuntu.${dist}_${arch}.deb
+dpkg -i bluehorizon_${version}~ppa~ubuntu.${dist}_all.deb
 ```
+
 ### Build and Register the Edge App 
-Log into your Edge Management cluster and define these varables
+
+Log into your Edge Management cluster and define these variables
 Configure the following properties before publishing the Service information to the Edge server
 
 ```bash
@@ -147,7 +159,7 @@ HZN_EXCHANGE_USER_AUTH="root/root:$EXCHANGE_ROOT_PASS"
 export HZN_ORG_ID=IBM
 ```
 
-Trust you exchange server with your Development environment on MacOS
+Trust your exchange server with your Development environment on MacOS
 
 Extract the certificate from teh Edge Application Manager
 
@@ -161,7 +173,13 @@ Register the certificate into MacOS Key Chain
 sudo security add-trusted-cert -d -r trustRoot -k /Library/Keychains/System.keychain /tmp/icp-ca.crt
 ```
 
-Create your Signing Key Pair
+Register the certificate into Linux Chain
+
+```bash
+sudo cp /tmp/icp-ca.crt /usr/local/share/ca-certificates && sudo update-ca-certificates
+```
+
+Create your Signing Key pair the local registration will be trusted, you can use your org name and email address
 
 ```bash
 hzn key create "IBM" "mjperrin@us.ibm.com"
@@ -184,44 +202,42 @@ Publish the Edge Device Service
 make publish-service
 ```
 
-### Configuring GitOps with Tekton
+### Configuring Edge CD with Tekton on Red Hat OpenShift
 
-You first need to create a secret in your development project called `edge-access` and it needs to contain
-the following properties. 
+The first step is to extract the key meta data from the IBM Edge Application Manager Cluster and save this into a secret.
 
-You can run this script to create the secret yaml.
+This secret then needs to be registered into your Red Hat OpenShift development project namespace on the cluster that you are using for development. This may be different to the cluster that the IBM Edge Application Manager has been installed into. This will enable a new Tekton task called `edge-cd` to be used in your pipeline to dynamically register the built image as a Service directly with IBM Edge Application Manager.   
+
+To extract this information first log into the IBM Edge Application Manager on the command line. Then run `./build-secret.sh` to create the secret YAML definition `edge-access-secret.yaml`.  
 
 ```
-cd tekton
 ./build-secret.sh
 ``` 
 
-Log into your Development cluster and run the following to registry the secret
+Check the secret has been created in your file system and the data inside the secret is as expected. The secret is added to the `.gitignore` so will not be checked into your GIT repository. 
+
+Next step is to log into your development cluster on the command line and register the secret into the project/namespace you are building the Go Gin Edge 
+application. Once logged in run this `kubectl` command to register the secret.  
 
 ```bash
 kubectl apply -f edge-access-secret.yaml
 ```
 
-Then Registry the Tekton Tasks and pipelines
+The Edge Tasks are now included in the [IBM Garage Cloud Native Toolkit](https://cloudnativetoolkit.dev/) in the [Garage Tekton Tasks repository](https://github.com/IBM/ibm-garage-tekton-tasks/tree/v1.27.0) these are automatically installed with the toolkit, you can upgrade them if newer releases are published.
 
-```bash
-kubectl apply -f 1-golang-test.yaml
-kubectl apply -f 8-gitops-edge.yaml
-jubectl apply -f golang-pipeline.yaml
-```
-
-Final part is Template this repo into your own repo in your destination git organization.
+Final part is create a repo from this template into your own repo in your own git organization. Then clone the code and register pipeline with OpenShift and Tekton.
 
 Register the pipeline with Tekton
 ```bash
 oc sync dev-edge --dev
 oc pipeline
-{select the `golang-pipeline`}
+{select the `golang-pipeline-edge` pipeline}
 ```
 
-Enjoy end to end CI/CD with Tekton and IBM Edge Application Manager
+Enjoy the end to end CI/CD with Tekton and IBM Edge Application Manager
 
 ## Next steps
+
 * Learn more about augmenting your Go applications on IBM Cloud with the [Go Programming Guide](https://cloud.ibm.com/docs/go?topic=go-getting-started).
 * Explore other [sample applications](https://cloud.ibm.com/developer/appservice/starter-kits) on IBM Cloud.
 

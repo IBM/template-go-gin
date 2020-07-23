@@ -4,3 +4,4 @@ server/localdev-config.json
 localdev-config.json
 server/localdev-config.json
 /main
+/edge-access-secret.yaml

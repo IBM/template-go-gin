@@ -2,8 +2,8 @@ swagger: '2.0'
 info:
   x-ibm-name: template-go-gin
   version: 1.0.0
-  title:  Go Service for Edge
-  description: Sample Edge Services written in the GoLang Programming Langauge
+  title:  Go Gin App for Microservices and Edge
+  description: Starter Appplication for Microservice and Edge solutions written in the GoLang Programming Langauge and Gin Web Framework
   contact:
     email: mjperrin@us.ibm.com
   termsOfService: "https://www-03.ibm.com/software/sla/sladb.nsf/sla/csdsp?OpenDocument"
@@ -20,7 +20,7 @@ paths:
   /health:
     get:
       operationId: get
-      description: Get health status of Edge Go Service
+      description: Get health status of Application
       responses:
         200:
           description: "Health check response"
