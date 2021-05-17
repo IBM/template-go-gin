@@ -5,3 +5,6 @@ localdev-config.json
 server/localdev-config.json
 /main
 /edge-access-secret.yaml
+*.tgz
+*.iml
+Chart.lock
